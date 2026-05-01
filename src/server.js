@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { z } = require("zod");
+const path = require("path");
 const { generateProposalPack, TONES } = require("./proposalEngine");
 const { saveJobAndProposals } = require("./db");
 
@@ -9,6 +10,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use(express.static(path.join(process.cwd(), "public")));
 
 const generateProposalSchema = z.object({
   job_description: z.string().min(20, "job_description must be at least 20 characters"),
@@ -20,6 +22,10 @@ const generateProposalSchema = z.object({
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "proposal-engine" });
+});
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(process.cwd(), "public", "index.html"));
 });
 
 app.post("/generate/proposal", (req, res) => {
